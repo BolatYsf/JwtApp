@@ -24,7 +24,8 @@ namespace JwtApp.Api.Persistance.Repositories
 
         public async Task<List<T>> GetAllAsync()
         {
-           return await _dbSet.AsNoTracking().ToListAsync();
+            
+            return await _dbSet.AsNoTracking().ToListAsync();
         }
 
         public async Task<T?> GetByFilter(Expression<Func<T, bool>> filter)
@@ -40,6 +41,7 @@ namespace JwtApp.Api.Persistance.Repositories
         public  void Remove(T entity)
         {
             _context.Entry(entity).State = EntityState.Deleted;
+           // _dbSet.Remove(entity);
         }
 
         public void  Update(T entity)
