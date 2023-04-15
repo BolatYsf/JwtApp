@@ -1,11 +1,13 @@
 ﻿using JwtApp.Api.Core.Application.Features.CQRS.Commands;
 using JwtApp.Api.Core.Application.Features.CQRS.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JwtApp.Api.Controllers
 {
+    [Authorize(Roles ="Admin")]
     [Route("api/[controller]")]
     [ApiController]
     public class CategoriesController : ControllerBase
@@ -56,7 +58,7 @@ namespace JwtApp.Api.Controllers
         {
             await _mediator.Send(new DeleteCategoryCommandRequest(id));
 
-            return NoContent();
+            return Ok();
         }
 
     }

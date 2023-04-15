@@ -1,12 +1,16 @@
 using AutoMapper;
 using JwtApp.Api.Core.Application.Interfaces;
 using JwtApp.Api.Core.Application.Mapping;
+using JwtApp.Api.Infrastructure.Tools;
 using JwtApp.Api.Persistance.Context;
 using JwtApp.Api.Persistance.Repositories;
 using JwtApp.Api.Persistance.UnitOfWork;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System.Reflection;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +36,22 @@ builder.Services.AddAutoMapper(opt =>
         new CategoryProfile()
     });
 });
+
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opt =>
+{
+    opt.RequireHttpsMetadata = false;
+    opt.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+    {
+        ValidAudience = JwtCustomDefaults.ValidAudience,
+        ValidIssuer = JwtCustomDefaults.ValidIssuer,
+        ClockSkew = TimeSpan.Zero,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtCustomDefaults.Key)),
+        ValidateIssuerSigningKey = true,
+        ValidateLifetime = true,
+    };
+
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -42,7 +62,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
