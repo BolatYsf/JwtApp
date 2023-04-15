@@ -11,7 +11,7 @@ namespace JwtApp.Mvc.Controllers
 {
     public class AccountController : Controller
     {
-       
+
         private readonly IHttpClientFactory _httpClientFactory;
 
         public AccountController(IHttpClientFactory httpClientFactory)
@@ -30,30 +30,38 @@ namespace JwtApp.Mvc.Controllers
         {
             if (ModelState.IsValid)
             {
-                var client=_httpClientFactory.CreateClient();
-                
-                var content = new StringContent(JsonSerializer.Serialize(loginVM),Encoding.UTF8,"application/json");
-               
-                var response=await client.PostAsync("https://localhost:7081/api/Auth/Login", content);
+                var client = _httpClientFactory.CreateClient();
+
+                var content = new StringContent(JsonSerializer.Serialize(loginVM), Encoding.UTF8, "application/json");
+
+                var response = await client.PostAsync("https://localhost:7081/api/Auth/Login", content);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    
-                    var jsonData=await response.Content.ReadAsStringAsync();
-                    
-                    var tokenModel=JsonSerializer.Deserialize<JwtResponseVM>(jsonData,new JsonSerializerOptions
+
+                    var jsonData = await response.Content.ReadAsStringAsync();
+
+                    var tokenModel = JsonSerializer.Deserialize<JwtResponseVM>(jsonData, new JsonSerializerOptions
                     {
                         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                     });
 
                     if (tokenModel != null)
                     {
-                        JwtSecurityTokenHandler handler =new JwtSecurityTokenHandler();
+                        JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
                         //tokenvm token okuyorum
-                        var token=handler.ReadJwtToken(tokenModel.Token);
+                        var token = handler.ReadJwtToken(tokenModel.Token);
 
-                        var claimsIdentity= new ClaimsIdentity(token.Claims,JwtBearerDefaults.AuthenticationScheme);
-                        
+                        var claims = token.Claims.ToList();
+
+                        if (tokenModel.Token != null)
+                        {
+                            
+                            claims.Add(new Claim("accessToken", tokenModel.Token));
+                        }
+                   
+                        var claimsIdentity = new ClaimsIdentity(claims, JwtBearerDefaults.AuthenticationScheme);
+
                         var authProps = new AuthenticationProperties
                         {
                             ExpiresUtc = tokenModel.ExpireDate,
@@ -62,19 +70,19 @@ namespace JwtApp.Mvc.Controllers
                         };
 
 
-                       await HttpContext.SignInAsync(JwtBearerDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity),authProps);
+                        await HttpContext.SignInAsync(JwtBearerDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProps);
 
-                        return RedirectToAction("Index","Home");
+                        return RedirectToAction("Index", "Home");
 
                     }
 
-                   
+
                 }
                 else
                 {
                     ModelState.AddModelError("", "Username-Password invalid");
                 }
-               
+
             }
             return View(loginVM);
         }
