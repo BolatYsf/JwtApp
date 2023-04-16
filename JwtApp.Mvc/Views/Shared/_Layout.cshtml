@@ -8,12 +8,13 @@
     <link href="~/bootstrap/bootstrap-5.3.0-alpha3-dist/css/datatable.css" rel="stylesheet" />
 </head>
 <body>
+    @await Component.InvokeAsync("Navbar") 
     <div class="container mt-4">
         @RenderBody()
     </div>
 
 
 
-    <style src="~/bootstrap/bootstrap-5.3.0-alpha3-dist/js/bootstrap.bundle.js"></style>
+    <script src="~/bootstrap/bootstrap-5.3.0-alpha3-dist/js/bootstrap.bundle.js"></script>
 </body>
 </html>

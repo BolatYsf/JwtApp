@@ -1,0 +1,43 @@
+﻿@model CreateProductVM
+
+@{
+    Layout = "_Layout";
+}
+
+
+<form asp-action="Create" asp-controller="Product" method="post">
+    
+    @{
+        TempData["Categories"] = System.Text.Json.JsonSerializer.Serialize(Model.Categories);
+    }
+    
+    <div class="mb-3">
+        <label asp-for="@Model.Name" class="form-label">Definition</label>
+        <span asp-validation-for="@Model.Name" class="text-danger"></span>
+        <input type="text" class="form-control" asp-for="@Model.Name">
+
+    </div>
+    <div class="mb-3">
+        <label asp-for="@Model.Price" class="form-label">Price</label>
+        <span asp-validation-for="@Model.Price" class="text-danger"></span>
+        <input type="number" class="form-control" asp-for="@Model.Price">
+
+    </div>
+    <div class="mb-3">
+        <label asp-for="@Model.Stock" class="form-label">Stock</label>
+        <span asp-validation-for="@Model.Stock" class="text-danger"></span>
+        <input type="number" class="form-control" asp-for="@Model.Stock">
+
+    </div>
+    <div class="mb-3">
+        <label asp-for="@Model.CategoryId" class="form-label">Category</label>
+        <select class="form-select" asp-items="@Model.Categories" asp-for="CategoryId">
+        </select>
+    </div>
+        <div class="mb-3 ">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+</form>
+

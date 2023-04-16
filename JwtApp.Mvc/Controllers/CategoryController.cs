@@ -106,6 +106,76 @@ namespace JwtApp.Mvc.Controllers
 
         }
 
+        public async Task<IActionResult> Update(int id)
+        {
+            var token = User.Claims.FirstOrDefault(x => x.Type == "accessToken")?.Value;
+
+
+
+            if (token != null)
+            {
+                var client = _httpClientFactory.CreateClient();
+
+
+                client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+                var response = await client.GetAsync($"https://localhost:7081/api/categories/{id}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var jsonData = await response.Content.ReadAsStringAsync();
+                    var result = JsonSerializer.Deserialize<CategoryListVM>(jsonData, new JsonSerializerOptions
+                    {
+                        //proplarım camelcase oldugu ıcın jsondata da prop eslestiriyorum 
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                    });
+
+                    return View(result);
+                }
+            }
+
+            return RedirectToAction("List");
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Update(CategoryListVM categoryVM)
+        {
+            if (ModelState.IsValid)
+            {
+                var token = User.Claims.FirstOrDefault(x => x.Type == "accessToken")?.Value;
+
+
+
+                if (token != null)
+                {
+                    var client = _httpClientFactory.CreateClient();
+
+
+                    client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+                    var jsonData = JsonSerializer.Serialize(categoryVM);
+
+                    var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+                    var response = await client.PutAsync("https://localhost:7081/api/categories", content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return RedirectToAction("List");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", "An error occurred ");
+                    }
+
+                }
+            }
+
+            return View(categoryVM);
+
+        }
+
     }
 
 
